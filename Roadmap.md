@@ -40,9 +40,9 @@ a-star-project/
 
 ### Fase 1 — Setup & fundamentos `Días 1–2`
 
-- [ ] **[Eduardo]** Crear repo privado en GitHub con estructura de carpetas base (`/src`, `/assets`, `/tests`, `/docs`)
-- [ ] **[Eduardo]** Añadir a Steven y Luis como colaboradores — acordar branch strategy (`main` + feature branches)
-- [ ] **[Todos]** Diseñar estructura del proyecto y documentar en README quién toca qué archivo
+- [x] **[Eduardo]** Crear repo privado en GitHub con estructura de carpetas base (`/src`, `/assets`, `/tests`, `/docs`)
+- [x] **[Eduardo]** Añadir a Steven y Luis como colaboradores — acordar branch strategy (`main` + feature branches)
+- [x] **[Todos]** Diseñar estructura del proyecto y documentar en README quién toca qué archivo
 - [ ] **[Steven]** Implementar clase `Maze` — grid 2D, carga desde matriz o archivo, validación de paredes, soporte para cualquier tamaño
 - [ ] **[Luis]** Setup de Pygame + ventana base — loop principal, render del grid, paleta de colores (vacío, pared, inicio, fin, path)
 
@@ -107,7 +107,7 @@ python src/main.py
 ```
 pygame>=2.5.0
 ```
-Vaya puta mierda
+
 ---
 
 ## 🔀 Git workflow
