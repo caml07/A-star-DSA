@@ -107,7 +107,7 @@ python src/main.py
 ```
 pygame>=2.5.0
 ```
-
+Vaya puta mierda
 ---
 
 ## 🔀 Git workflow
