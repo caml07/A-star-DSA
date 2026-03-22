@@ -43,8 +43,8 @@ a-star-project/
 - [x] **[Eduardo]** Crear repo privado en GitHub con estructura de carpetas base (`/src`, `/assets`, `/tests`, `/docs`)
 - [x] **[Eduardo]** Añadir a Steven y Luis como colaboradores — acordar branch strategy (`main` + feature branches)
 - [x] **[Todos]** Diseñar estructura del proyecto y documentar en README quién toca qué archivo
-- [X] **[Steven]**  
-- [ ] **[Luis]** Setup de Pygame + ventana base — loop principal, render del grid, paleta de colores (vacío, pared, inicio, fin, path)
+- [x] **[Steven]**
+- [x] **[Luis]** Setup de Pygame + ventana base — loop principal, render del grid, paleta de colores (vacío, pared, inicio, fin, path)
 
 ---
 

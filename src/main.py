@@ -12,6 +12,7 @@ Uso:
 import argparse
 import sys
 import os
+from visualizer import Visualizer
 
 sys.path.insert(0, os.path.dirname(__file__))
 
