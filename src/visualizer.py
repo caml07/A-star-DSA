@@ -229,7 +229,11 @@ class Visualizer:
 
         if not hasattr(self, "_font_cache"):
             pygame._freetype.init()
-            self._font_cache = pygame._freetype.Font(None, 18)
+            import os
+
+            pygame_pkg = os.path.dirname(pygame.__file__)
+            font_path = os.path.join(pygame_pkg, "freesansbold.ttf")
+            self._font_cache = pygame._freetype.Font(font_path, 18)
 
         lines = [
             f"Status : {self.stats['status']}",
