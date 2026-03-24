@@ -77,7 +77,6 @@ class Visualizer:
 
         self.screen = pygame.display.set_mode((self.win_w, self.win_h))
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.SysFont("monospace", 16)
 
         # Precompute one Rect per cell — avoids recalculating every frame
         self._rects = self._build_rects()
@@ -228,6 +227,10 @@ class Visualizer:
         panel = pygame.Rect(0, self.grid_h, self.win_w, STATS_HEIGHT)
         pygame.draw.rect(self.screen, COLORS["stats_bg"], panel)
 
+        if not hasattr(self, "_font_cache"):
+            pygame._freetype.init()
+            self._font_cache = pygame._freetype.Font(None, 18)
+
         lines = [
             f"Status : {self.stats['status']}",
             f"Nodes  : {self.stats['nodes_explored']}   "
@@ -235,7 +238,7 @@ class Visualizer:
             f"Time   : {self.stats['time_ms']} ms",
         ]
         for i, line in enumerate(lines):
-            surf = self.font.render(line, True, COLORS["stats_text"])
+            surf, _ = self._font_cache.render(line, True, COLORS["stats_text"])
             self.screen.blit(surf, (14, self.grid_h + 10 + i * 22))
 
     # ── Event handling ─────────────────────────────────────────────────────
