@@ -77,8 +77,7 @@ class Visualizer:
 
         self.screen = pygame.display.set_mode((self.win_w, self.win_h))
         self.clock = pygame.time.Clock()
-        pygame._freetype.init()
-        self.font = pygame._freetype.Font(None, 14)
+        self.font = pygame.font.SysFont("monospace", 16)
 
         # Precompute one Rect per cell — avoids recalculating every frame
         self._rects = self._build_rects()
@@ -191,12 +190,34 @@ class Visualizer:
     # ── Drawing ────────────────────────────────────────────────────────────
 
     def _draw_frame(self):
-        """Blit background, repaint all cells, then draw the stats panel."""
+        """Blit background, repaint cells por capas, luego stats panel."""
         self.screen.blit(self._bg, (0, 0))
 
-        # Always paint every cell so walls and empty cells are never missed
+        # Orden de capas: el path y start/end siempre al último para no ser tapados
+        LAYER_ORDER = [
+            "wall",
+            "empty",
+            "closed_list",
+            "open_list",
+            "bidir",
+            "path",
+            "start",
+            "end",
+        ]
+        color_to_key = {COLORS[k]: k for k in LAYER_ORDER}
+
+        # Agrupar celdas por capa
+        layers = {k: [] for k in LAYER_ORDER}
         for pos, color in self._cell_color.items():
-            pygame.draw.rect(self.screen, color, self._rects[pos])
+            key = color_to_key.get(color)
+            if key:
+                layers[key].append(pos)
+
+        # Pintar capa por capa en el orden correcto
+        for key in LAYER_ORDER:
+            color = COLORS[key]
+            for pos in layers[key]:
+                pygame.draw.rect(self.screen, color, self._rects[pos])
 
         self._dirty.clear()
         self._draw_stats()
@@ -214,7 +235,7 @@ class Visualizer:
             f"Time   : {self.stats['time_ms']} ms",
         ]
         for i, line in enumerate(lines):
-            surf, _ = self.font.render(line, True, COLORS["stats_text"])
+            surf = self.font.render(line, True, COLORS["stats_text"])
             self.screen.blit(surf, (14, self.grid_h + 10 + i * 22))
 
     # ── Event handling ─────────────────────────────────────────────────────
