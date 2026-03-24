@@ -11,16 +11,17 @@ Designed for efficiency:
 """
 
 import pygame
+import pygame._freetype
 import sys
 
 # ─────────────────────────────────────────
 #  Config constants
 # ─────────────────────────────────────────
 
-CELL_SIZE    = 60       # px per grid cell
-MARGIN       = 1        # px gap between cells (for grid lines)
-STATS_HEIGHT = 80       # px reserved at the bottom for the stats panel
-FPS          = 60       # max frames per second
+CELL_SIZE = 60  # px per grid cell
+MARGIN = 1  # px gap between cells (for grid lines)
+STATS_HEIGHT = 80  # px reserved at the bottom for the stats panel
+FPS = 60  # max frames per second
 
 TITLE = "A* Pathfinding — DSA Project"
 
@@ -29,24 +30,25 @@ TITLE = "A* Pathfinding — DSA Project"
 # ─────────────────────────────────────────
 
 COLORS = {
-    "empty"      : (255, 255, 255),   # white      — open cell
-    "wall"       : ( 40,  40,  40),   # dark gray  — blocked cell
-    "start"      : (  0, 200, 100),   # green      — start cell
-    "end"        : (220,  50,  50),   # red        — end cell
-    "open_list"  : (255, 220,  80),   # yellow     — frontier nodes
-    "closed_list": (255, 150,  50),   # orange     — visited nodes
-    "path"       : ( 70, 130, 220),   # blue       — final path
-    "bidir"      : (160,  80, 220),   # purple     — bidirectional front
-    "grid_line"  : (200, 200, 200),   # light gray — cell borders
-    "background" : ( 18,  18,  18),   # near-black — window background
-    "stats_bg"   : ( 28,  28,  28),   # dark panel — stats area
-    "stats_text" : (220, 220, 220),   # off-white  — stats text
+    "empty": (255, 255, 255),  # white      — open cell
+    "wall": (40, 40, 40),  # dark gray  — blocked cell
+    "start": (0, 200, 100),  # green      — start cell
+    "end": (220, 50, 50),  # red        — end cell
+    "open_list": (255, 220, 80),  # yellow     — frontier nodes
+    "closed_list": (255, 150, 50),  # orange     — visited nodes
+    "path": (70, 130, 220),  # blue       — final path
+    "bidir": (160, 80, 220),  # purple     — bidirectional front
+    "grid_line": (200, 200, 200),  # light gray — cell borders
+    "background": (18, 18, 18),  # near-black — window background
+    "stats_bg": (28, 28, 28),  # dark panel — stats area
+    "stats_text": (220, 220, 220),  # off-white  — stats text
 }
 
 
 # ─────────────────────────────────────────
 #  Visualizer class
 # ─────────────────────────────────────────
+
 
 class Visualizer:
     """
@@ -63,19 +65,20 @@ class Visualizer:
         pygame.init()
         pygame.display.set_caption(TITLE)
 
-        self.maze  = maze
-        self.rows  = maze.rows
-        self.cols  = maze.cols
+        self.maze = maze
+        self.rows = maze.rows
+        self.cols = maze.cols
 
         # Window dimensions
-        self.grid_w  = self.cols * CELL_SIZE
-        self.grid_h  = self.rows * CELL_SIZE
-        self.win_w   = self.grid_w
-        self.win_h   = self.grid_h + STATS_HEIGHT
+        self.grid_w = self.cols * CELL_SIZE
+        self.grid_h = self.rows * CELL_SIZE
+        self.win_w = self.grid_w
+        self.win_h = self.grid_h + STATS_HEIGHT
 
         self.screen = pygame.display.set_mode((self.win_w, self.win_h))
-        self.clock  = pygame.time.Clock()
-        self.font   = pygame.font.SysFont("monospace", 14)
+        self.clock = pygame.time.Clock()
+        pygame._freetype.init()
+        self.font = pygame._freetype.Font(None, 14)
 
         # Precompute one Rect per cell — avoids recalculating every frame
         self._rects = self._build_rects()
@@ -93,14 +96,14 @@ class Visualizer:
         # Stats to display in the panel
         self.stats = {
             "nodes_explored": 0,
-            "path_length"   : 0,
-            "time_ms"       : 0.0,
-            "status"        : "Ready",
+            "path_length": 0,
+            "time_ms": 0.0,
+            "status": "Ready",
         }
 
         # Start + End positions (set by mouse or programmatically)
         self.start = None
-        self.end   = None
+        self.end = None
 
     # ── Setup helpers ──────────────────────────────────────────────────────
 
@@ -138,7 +141,7 @@ class Visualizer:
             for c in range(self.cols):
                 key = "wall" if self.maze.is_wall(r, c) else "empty"
                 self._cell_color[(r, c)] = COLORS[key]
-        self._dirty = set(self._cell_color.keys())   # full repaint on first frame
+        self._dirty = set(self._cell_color.keys())  # full repaint on first frame
 
     # ── Color helpers ──────────────────────────────────────────────────────
 
@@ -211,7 +214,7 @@ class Visualizer:
             f"Time   : {self.stats['time_ms']} ms",
         ]
         for i, line in enumerate(lines):
-            surf = self.font.render(line, True, COLORS["stats_text"])
+            surf, _ = self.font.render(line, True, COLORS["stats_text"])
             self.screen.blit(surf, (14, self.grid_h + 10 + i * 22))
 
     # ── Event handling ─────────────────────────────────────────────────────
@@ -230,7 +233,7 @@ class Visualizer:
                 if event.key == pygame.K_r:
                     self._init_cell_colors()
                     self.start = None
-                    self.end   = None
+                    self.end = None
         return True
 
     def _pixel_to_cell(self, x, y):
@@ -245,8 +248,12 @@ class Visualizer:
 
     # ── Public API ─────────────────────────────────────────────────────────
 
-    def run(self, result: dict | None = None, animate: bool = False,
-            animation_delay_ms: int = 30):
+    def run(
+        self,
+        result: dict | None = None,
+        animate: bool = False,
+        animation_delay_ms: int = 30,
+    ):
         """
         Main loop.
 
@@ -258,12 +265,14 @@ class Visualizer:
         animation_delay_ms : ms between animation frames (lower = faster)
         """
         if result:
-            self.stats.update({
-                "nodes_explored": result.get("nodes_explored", 0),
-                "path_length"   : len(result.get("path", [])),
-                "time_ms"       : result.get("time_ms", 0.0),
-                "status"        : "Path found" if result.get("found") else "No path",
-            })
+            self.stats.update(
+                {
+                    "nodes_explored": result.get("nodes_explored", 0),
+                    "path_length": len(result.get("path", [])),
+                    "time_ms": result.get("time_ms", 0.0),
+                    "status": "Path found" if result.get("found") else "No path",
+                }
+            )
             if result.get("found"):
                 self.mark_path(result["path"])
 
@@ -276,7 +285,7 @@ class Visualizer:
             running = self._handle_events()
 
             # Mouse: left click = start, right click = end
-            if pygame.mouse.get_pressed()[0]:   # left
+            if pygame.mouse.get_pressed()[0]:  # left
                 pos = self._pixel_to_cell(*pygame.mouse.get_pos())
                 if pos and not self.maze.is_wall(*pos):
                     self.set_start(pos)
@@ -290,8 +299,13 @@ class Visualizer:
         pygame.quit()
         sys.exit()
 
-    def callback(self, open_positions: set, closed_positions: set,
-                 open_b: set | None = None, closed_b: set | None = None):
+    def callback(
+        self,
+        open_positions: set,
+        closed_positions: set,
+        open_b: set | None = None,
+        closed_b: set | None = None,
+    ):
         """
         Hook for astar() / astar_bidirectional() to call on each step.
         Pass this method as the `callback` argument to either algorithm.
@@ -317,7 +331,7 @@ class Visualizer:
                 sys.exit()
 
         self._draw_frame()
-        pygame.time.delay(30)   # default animation speed — adjustable later
+        pygame.time.delay(30)  # default animation speed — adjustable later
 
 
 # ─────────────────────────────────────────
@@ -330,6 +344,7 @@ if __name__ == "__main__":
     Run with:  python src/vizualizer.py
     """
     import sys, os
+
     sys.path.insert(0, os.path.dirname(__file__))
     from maze import Maze
 
