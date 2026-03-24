@@ -21,18 +21,18 @@ El algoritmo este que nos dejo morales :D
 - ✅ **[Eduardo]** Añadir colaboradores
 - ✅ **[Todos]** Documentar responsabilidades
 
-### Fase 2 — Core A* (Pendiente)
-- [ ] Eduardo: Implementar A* estándar
-- [ ] Eduardo: Heurísticas configurables
-- [ ] Luis: Selector inicio/fin con mouse
-- [ ] Luis: Visualizar nodos explorados
+### Fase 2 — Core A*
+- ✅ **[Eduardo]** Implementar A* estándar
+- ✅ **[Eduardo]** Heurísticas configurables (simplificado a Euclidiana)
+- ✅ **[Luis]** Selector inicio/fin con mouse
+- ✅ **[Luis]** Visualizar nodos explorados
 - [ ] Steven: Unit tests
 
-### Fase 3 — Features (Pendiente)
-- [ ] Steven: Cargar maze desde archivo
-- [ ] Luis: Panel de estadísticas
-- [ ] Luis + Eduardo: Animación paso a paso
-- [ ] Eduardo: Bidirectional A* (extra)
+### Fase 3 — Features
+- ✅ **[Steven]** Cargar maze desde archivo
+- ✅ **[Luis]** Panel de estadísticas
+- ✅ **[Luis + Eduardo]** Animación paso a paso
+- ✅ **[Eduardo]** Bidirectional A* (extra)
 
 ### Fase 4 — Polish (Pendiente)
 - [ ] Luis: UI/UX final
