@@ -227,36 +227,23 @@ class Visualizer:
         panel = pygame.Rect(0, self.grid_h, self.win_w, STATS_HEIGHT)
         pygame.draw.rect(self.screen, COLORS["stats_bg"], panel)
 
-        try:
-            from PIL import Image, ImageDraw, ImageFont
-            import io
+        if not hasattr(self, "_font_cache"):
+            pygame._freetype.init()
+            import os
 
-            if not hasattr(self, "_font_cache"):
-                self._font_cache = ImageFont.truetype(
-                    "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 12
-                )
+            pygame_pkg = os.path.dirname(pygame.__file__)
+            font_path = os.path.join(pygame_pkg, "freesansbold.ttf")
+            self._font_cache = pygame._freetype.Font(font_path, 16)
 
-            lines = [
-                f"Status : {self.stats['status']}",
-                f"Nodes  : {self.stats['nodes_explored']}   "
-                f"Path   : {self.stats['path_length']} steps   "
-                f"Time   : {self.stats['time_ms']} ms",
-            ]
-
-            for i, line in enumerate(lines):
-                img = Image.new("RGBA", (400, 30), (0, 0, 0, 0))
-                draw = ImageDraw.Draw(img)
-                draw.text(
-                    (0, 0), line, font=self._font_cache, fill=COLORS["stats_text"]
-                )
-
-                data = io.BytesIO()
-                img.save(data, format="PNG")
-                data.seek(0)
-                surf = pygame.image.load(data)
-                self.screen.blit(surf, (14, self.grid_h + 5 + i * 22))
-        except Exception as e:
-            print(f"Font error: {e}", file=sys.stderr)
+        lines = [
+            f"Status : {self.stats['status']}",
+            f"Nodes  : {self.stats['nodes_explored']}   "
+            f"Path   : {self.stats['path_length']} steps   "
+            f"Time   : {self.stats['time_ms']} ms",
+        ]
+        for i, line in enumerate(lines):
+            surf, _ = self._font_cache.render(line, COLORS["stats_text"])
+            self.screen.blit(surf, (14, self.grid_h + 12 + i * 24))
 
     # ── Event handling ─────────────────────────────────────────────────────
 
