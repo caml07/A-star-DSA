@@ -50,10 +50,10 @@ a-star-project/
 
 ### Fase 2 — Core del A\* `Días 3–5`
 
-- [ ] **[Eduardo]** Implementar A\* estándar — open/closed list, heurística Manhattan, reconstrucción del path, bien comentado
-- [ ] **[Eduardo]** Heurísticas configurables — Manhattan (default), Euclidiana, Diagonal — como parámetro al ejecutar
-- [ ] **[Luis]** Selector de inicio y fin con mouse — click izquierdo = inicio, click derecho = fin, validar que no caigan en paredes
-- [ ] **[Luis]** Visualizar nodos explorados en tiempo real — colorear open list (amarillo) y closed list (naranja) mientras corre el algoritmo
+- [x] **[Eduardo]** Implementar A\* estándar — open/closed list, heurística Manhattan, reconstrucción del path, bien comentado
+- [x] **[Eduardo]** Heurísticas configurables — Manhattan (default), Euclidiana, Diagonal — como parámetro al ejecutar
+- [x] **[Luis]** Selector de inicio y fin con mouse — click izquierdo = inicio, click derecho = fin, validar que no caigan en paredes
+- [x] **[Luis]** Visualizar nodos explorados en tiempo real — colorear open list (amarillo) y closed list (naranja) mientras corre el algoritmo
 - [ ] **[Steven]** Unit tests del algoritmo — mínimo 3 casos: path existe, no hay path, inicio == fin; verificar que el path es óptimo
 
 ---
