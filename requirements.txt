@@ -1,27 +1,2 @@
 pygame>=2.5.0
-isntall pip install Pillow
-image requirements 
-1. High Contrast (Black & White)
-Walls should be as close to pure black as possible.
-Paths must be white or very light grey.
-The code uses a threshold (currently set to 200) to decide what is a wall.
- If the image is too blurry or colorful, the "chunker" might get confused and
-  create walls where there shouldn't be any.
-
-2. Perfect Square Cropping
-You must crop the image so that the outer black border of the maze is the exact edge of the image.
-f there is white "padding" or text (like "Maze Generator") outside the border, the grid math will shift, and your walls won't 
-ine up with the 41 x41  logic.
-
-
-3.Grid Compatibility
-The current code is tuned for a $41 \times 41$ logical grid.
-This works best for mazes generated as 20x20 on most websites 
-(because 20 paths + 19 internal walls + 2 outer borders = 41).
-If you want to upload a much larger maze (like 50x50), you would
- need to change the logical_size=(41, 41) variable in your load_from_image method in maze.py to (101, 101).
-
-4. file format
-Supported: .png, .jpg, .jpeg, and .bmp.
-Recommendation: Use .png whenever possible. .jpg often adds "noise"
- around black lines which can occasionally trick the wall-detector.
+Pillow>=10.0.0
