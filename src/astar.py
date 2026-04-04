@@ -15,6 +15,7 @@ import time
 #  Heurística
 # ─────────────────────────────────────────
 
+
 def heuristic(a, b):
     """
     Distancia Euclidiana — línea recta entre dos puntos en el grid.
@@ -26,6 +27,7 @@ def heuristic(a, b):
 # ─────────────────────────────────────────
 #  Nodo interno del A*
 # ─────────────────────────────────────────
+
 
 class Node:
     """
@@ -40,10 +42,10 @@ class Node:
     """
 
     def __init__(self, pos, g=0, h=0, parent=None):
-        self.pos    = pos
-        self.g      = g
-        self.h      = h
-        self.f      = g + h
+        self.pos = pos
+        self.g = g
+        self.h = h
+        self.f = g + h
         self.parent = parent
 
     # heapq compara por el primer elemento de la tupla;
@@ -55,6 +57,7 @@ class Node:
 # ─────────────────────────────────────────
 #  Algoritmo A* estándar
 # ─────────────────────────────────────────
+
 
 def astar(maze, start, end, callback=None):
     """
@@ -93,8 +96,8 @@ def astar(maze, start, end, callback=None):
     heapq.heappush(open_heap, (start_node.f, start_node))
 
     # Diccionarios para acceso rápido
-    open_map   = {start: start_node}   # pos → Node (en open list)
-    closed_set = set()                  # posiciones ya procesadas
+    open_map = {start: start_node}  # pos → Node (en open list)
+    closed_set = set()  # posiciones ya procesadas
 
     nodes_explored = 0
     t_start = time.perf_counter()
@@ -118,10 +121,10 @@ def astar(maze, start, end, callback=None):
         if current.pos == end:
             elapsed = (time.perf_counter() - t_start) * 1000
             return {
-                "path":           _reconstruct_path(current),
+                "path": _reconstruct_path(current),
                 "nodes_explored": nodes_explored,
-                "time_ms":        round(elapsed, 3),
-                "found":          True,
+                "time_ms": round(elapsed, 3),
+                "found": True,
             }
 
         # Expandir vecinos
@@ -144,16 +147,17 @@ def astar(maze, start, end, callback=None):
     # Se agotó la open list sin encontrar destino
     elapsed = (time.perf_counter() - t_start) * 1000
     return {
-        "path":           [],
+        "path": [],
         "nodes_explored": nodes_explored,
-        "time_ms":        round(elapsed, 3),
-        "found":          False,
+        "time_ms": round(elapsed, 3),
+        "found": False,
     }
 
 
 # ─────────────────────────────────────────
 #  Bidirectional A* (extra ⭐)
 # ─────────────────────────────────────────
+
 
 def astar_bidirectional(maze, start, end, callback=None):
     """
@@ -172,26 +176,25 @@ def astar_bidirectional(maze, start, end, callback=None):
         return {"path": [start], "nodes_explored": 0, "time_ms": 0.0, "found": True}
 
     # Frente A: start → end
-    node_a   = Node(start, g=0, h=heuristic(start, end))
-    heap_a   = [(node_a.f, node_a)]
-    map_a    = {start: node_a}
+    node_a = Node(start, g=0, h=heuristic(start, end))
+    heap_a = [(node_a.f, node_a)]
+    map_a = {start: node_a}
     closed_a = set()
 
     # Frente B: end → start
-    node_b   = Node(end, g=0, h=heuristic(end, start))
-    heap_b   = [(node_b.f, node_b)]
-    map_b    = {end: node_b}
+    node_b = Node(end, g=0, h=heuristic(end, start))
+    heap_b = [(node_b.f, node_b)]
+    map_b = {end: node_b}
     closed_b = set()
 
     best_cost = math.inf
-    meeting_a = None   # nodo del frente A en el punto de encuentro
-    meeting_b = None   # nodo del frente B en el punto de encuentro
+    meeting_a = None  # nodo del frente A en el punto de encuentro
+    meeting_b = None  # nodo del frente B en el punto de encuentro
 
     nodes_explored = 0
     t_start = time.perf_counter()
 
     while heap_a and heap_b:
-
         # ── Expandir frente A ──────────────────
         _, cur_a = heapq.heappop(heap_a)
         if cur_a.pos not in closed_a:
@@ -204,11 +207,18 @@ def astar_bidirectional(maze, start, end, callback=None):
 
             # ¿El frente A alcanzó algo que el frente B ya procesó?
             if cur_a.pos in closed_b:
-                cost = cur_a.g + map_b.get(cur_a.pos, _get_closed_node(closed_b, cur_a.pos, node_b)).g
+                cost = (
+                    cur_a.g
+                    + map_b.get(
+                        cur_a.pos, _get_closed_node(closed_b, cur_a.pos, node_b)
+                    ).g
+                )
                 if cost < best_cost:
                     best_cost = cost
                     meeting_a = cur_a
-                    meeting_b = _find_node_in_closed(cur_a.pos, heap_b, closed_b, node_b)
+                    meeting_b = _find_node_in_closed(
+                        cur_a.pos, heap_b, closed_b, node_b
+                    )
                 break
 
             for nbr in maze.get_neighbors(*cur_a.pos):
@@ -235,7 +245,9 @@ def astar_bidirectional(maze, start, end, callback=None):
                 if cost < best_cost:
                     best_cost = cost
                     meeting_b = cur_b
-                    meeting_a = _find_node_in_closed(cur_b.pos, heap_a, closed_a, node_a)
+                    meeting_a = _find_node_in_closed(
+                        cur_b.pos, heap_a, closed_a, node_a
+                    )
                 break
 
             for nbr in maze.get_neighbors(*cur_b.pos):
@@ -252,23 +264,24 @@ def astar_bidirectional(maze, start, end, callback=None):
     if meeting_a and meeting_b:
         path = _reconstruct_path(meeting_a) + _reconstruct_path(meeting_b)[1:][::-1]
         return {
-            "path":           path,
+            "path": path,
             "nodes_explored": nodes_explored,
-            "time_ms":        round(elapsed, 3),
-            "found":          True,
+            "time_ms": round(elapsed, 3),
+            "found": True,
         }
 
     return {
-        "path":           [],
+        "path": [],
         "nodes_explored": nodes_explored,
-        "time_ms":        round(elapsed, 3),
-        "found":          False,
+        "time_ms": round(elapsed, 3),
+        "found": False,
     }
 
 
 # ─────────────────────────────────────────
 #  Helpers privados
 # ─────────────────────────────────────────
+
 
 def _reconstruct_path(node):
     """Recorre los punteros `parent` desde el nodo final hasta el inicio."""
@@ -283,6 +296,14 @@ def _find_node_in_closed(pos, heap, closed, fallback):
     """Busca un nodo por posición en el heap (para el bidireccional)."""
     for _, node in heap:
         if node.pos == pos:
+            return node
+    return fallback
+
+
+def _get_closed_node(closed_set, pos, fallback):
+    """Busca un nodo por posición en closed_set."""
+    for node in closed_set:
+        if hasattr(node, "pos") and node.pos == pos:
             return node
     return fallback
 

@@ -16,18 +16,21 @@ from maze import Maze
 from astar import astar, astar_bidirectional
 from visualizer import Visualizer
 
-DEFAULT_MAZE = [
-    [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 1, 0, 1, 1, 1, 1, 1, 0, 0],
-    [0, 0, 0, 1, 0, 0, 0, 1, 0, 1],
-    [1, 1, 0, 1, 0, 1, 0, 1, 0, 0],
-    [0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
-    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-    [1, 1, 1, 0, 1, 1, 0, 1, 1, 0],
-    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-    [0, 1, 1, 1, 1, 0, 1, 1, 1, 0],
-]
+
+def load_default_maze():
+    """Carga el laberinto por defecto desde el archivo txt."""
+    maze_path = os.path.join(
+        os.path.dirname(__file__), "..", "data", "default_maze.txt"
+    )
+    matrix = []
+    with open(maze_path, "r") as f:
+        for line in f:
+            row = [int(x) for x in line.strip().split(",")]
+            matrix.append(row)
+    return matrix
+
+
+DEFAULT_MAZE = load_default_maze()
 
 # ─────────────────────────────────────────
 #  UI Helpers (File Explorer & Menu)

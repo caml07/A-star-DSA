@@ -199,19 +199,6 @@ class Visualizer:
             surf = self._font_cache.render(line, True, COLORS["stats_text"])
             self.screen.blit(surf, (14, self.grid_h + 15 + i * 28))
 
-    def _handle_events(self) -> bool:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                return False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    return False
-                if event.key == pygame.K_r:
-                    self._init_cell_colors()
-                    self.start = None
-                    self.end = None
-        return True
-
     def _pixel_to_cell(self, x, y):
         if y >= self.grid_h or x >= self.grid_w:
             return None
@@ -220,45 +207,6 @@ class Visualizer:
         if 0 <= r < self.rows and 0 <= c < self.cols:
             return (r, c)
         return None
-
-    def run(
-        self,
-        result: dict | None = None,
-        animate: bool = False,
-        animation_delay_ms: int = 30,
-    ):
-        if result:
-            self.stats.update(
-                {
-                    "nodes_explored": result.get("nodes_explored", 0),
-                    "path_length": len(result.get("path", [])),
-                    "time_ms": result.get("time_ms", 0.0),
-                    "status": "Path found" if result.get("found") else "No path",
-                }
-            )
-            if result.get("found"):
-                self.mark_path(result["path"])
-
-        self._dirty = set(self._cell_color.keys())
-
-        running = True
-        while running:
-            self.clock.tick(FPS)
-            running = self._handle_events()
-
-            if pygame.mouse.get_pressed()[0]:
-                pos = self._pixel_to_cell(*pygame.mouse.get_pos())
-                if pos and not self.maze.is_wall(*pos):
-                    self.set_start(pos)
-            elif pygame.mouse.get_pressed()[2]:
-                pos = self._pixel_to_cell(*pygame.mouse.get_pos())
-                if pos and not self.maze.is_wall(*pos):
-                    self.set_end(pos)
-
-            self._draw_frame()
-
-        pygame.quit()
-        sys.exit()
 
     def callback(
         self,
