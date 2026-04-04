@@ -54,13 +54,13 @@ a-star-project/
 - [x] **[Eduardo]** Heurísticas configurables — Manhattan (default), Euclidiana, Diagonal — como parámetro al ejecutar
 - [x] **[Luis]** Selector de inicio y fin con mouse — click izquierdo = inicio, click derecho = fin, validar que no caigan en paredes
 - [x] **[Luis]** Visualizar nodos explorados en tiempo real — colorear open list (amarillo) y closed list (naranja) mientras corre el algoritmo
-- [ ] **[Steven]** Unit tests del algoritmo — mínimo 3 casos: path existe, no hay path, inicio == fin; verificar que el path es óptimo
+- [x] **[Steven]** Unit tests del algoritmo — mínimo 3 casos: path existe, no hay path, inicio == fin; verificar que el path es óptimo
 
 ---
 
 ### Fase 3 — Features de presentación `Días 6–8`
 
-- [ ] **[Steven]** Cargar maze desde archivo `.txt` o `.json` con 1s y 0s — permite usar el maze fijo del profe sin hardcodear
+- [x] **[Steven]** Cargar maze desde archivo `.txt` o `.json` con 1s y 0s — permite usar el maze fijo del profe sin hardcodear
 - [ ] **[Luis]** Panel de estadísticas en pantalla — nodos explorados, longitud del path, tiempo de ejecución (ms)
 - [ ] **[Luis + Eduardo]** Animación paso a paso con velocidad ajustable — slider o teclas para controlar la velocidad de visualización
 - [ ] ⭐ **[Eduardo]** **(Extra)** Bidirectional A\* — dos frentes de búsqueda simultáneos desde inicio y fin, se encuentran en el medio

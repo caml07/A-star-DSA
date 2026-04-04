@@ -1,3 +1,5 @@
+from PIL import Image
+
 class Maze:
     def __init__(self):
         self.grid = []
@@ -28,6 +30,48 @@ class Maze:
         except FileNotFoundError:
             print("Error: File not found.")
 
+    def load_from_image(self, image_path, logical_size=(41, 41), threshold=200):
+        """
+        Converts a maze image into a strict logical grid.
+        Uses chunking to guarantee no walls are ever lost!
+        """
+        try:
+            img = Image.open(image_path).convert('L')
+            img_w, img_h = img.size
+            
+            self.cols, self.rows = logical_size
+            self.grid = []
+            
+            # Calculate the width/height of the chunks we need to scan
+            chunk_w = img_w / self.cols
+            chunk_h = img_h / self.rows
+            
+            for r in range(self.rows):
+                row_data = []
+                for c in range(self.cols):
+                    # Define the boundaries of the chunk
+                    left = int(c * chunk_w)
+                    top = int(r * chunk_h)
+                    right = int((c + 1) * chunk_w)
+                    bottom = int((r + 1) * chunk_h)
+                    
+                    # Crop that chunk out of the image
+                    chunk = img.crop((left, top, right, bottom))
+                    
+                    # min() finds the darkest pixel in the chunk. 
+                    # If there's even a sliver of a black wall, it becomes a wall block!
+                    if min(chunk.getdata()) < threshold:
+                        row_data.append(1)  # Wall
+                    else:
+                        row_data.append(0)  # Path
+                        
+                self.grid.append(row_data)
+                
+            print(f"Success! Image chunked cleanly into a {self.cols}x{self.rows} logical grid.")
+            
+        except Exception as e:
+            print(f"Error loading image: {e}")
+
     def is_wall(self, row, col):
         """Validates if a coordinate is a wall or out of bounds."""
         if not (0 <= row < self.rows and 0 <= col < self.cols):
@@ -49,4 +93,5 @@ class Maze:
     def display(self):
         """Prints the maze to the console."""
         for row in self.grid:
-            print("".join(["█" if cell == 1 else " " for cell in row]))
+            line = "".join(["██" if cell == 1 else "  " for cell in row])
+            print(line)
