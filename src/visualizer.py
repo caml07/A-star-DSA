@@ -2,13 +2,13 @@
 visualizer.py — Pygame Visualizer for A* Pathfinding
 DSA Project | Luis
 """
+
 import pygame
-import pygame._freetype
 import sys
 
 MAX_WINDOW_SIZE = 800
 MARGIN = 1
-STATS_HEIGHT = 80
+STATS_HEIGHT = 100
 FPS = 60
 
 TITLE = "A* Pathfinding — DSA Project"
@@ -28,6 +28,7 @@ COLORS = {
     "stats_text": (220, 220, 220),
 }
 
+
 class Visualizer:
     def __init__(self, maze):
         pygame.init()
@@ -39,7 +40,7 @@ class Visualizer:
 
         safe_cols = max(1, self.cols)
         safe_rows = max(1, self.rows)
-        
+
         cell_w = MAX_WINDOW_SIZE // safe_cols
         cell_h = MAX_WINDOW_SIZE // safe_rows
         self.cell_size = max(1, min(60, min(cell_w, cell_h)))
@@ -86,7 +87,12 @@ class Visualizer:
         if self.cell_size > 4:
             for r in range(self.rows):
                 for c in range(self.cols):
-                    outer = pygame.Rect(c * self.cell_size, r * self.cell_size, self.cell_size, self.cell_size)
+                    outer = pygame.Rect(
+                        c * self.cell_size,
+                        r * self.cell_size,
+                        self.cell_size,
+                        self.cell_size,
+                    )
                     pygame.draw.rect(bg, COLORS["grid_line"], outer)
         return bg
 
@@ -133,7 +139,9 @@ class Visualizer:
                 self._set_cell(pos, "path")
 
     def reset_search_colors(self):
-        search_colors = {COLORS[k] for k in ("open_list", "closed_list", "path", "bidir")}
+        search_colors = {
+            COLORS[k] for k in ("open_list", "closed_list", "path", "bidir")
+        }
         for pos, color in list(self._cell_color.items()):
             if color in search_colors:
                 self._set_cell(pos, "empty")
@@ -142,8 +150,14 @@ class Visualizer:
         self.screen.blit(self._bg, (0, 0))
 
         LAYER_ORDER = [
-            "wall", "empty", "closed_list", "open_list", 
-            "bidir", "path", "start", "end",
+            "wall",
+            "empty",
+            "closed_list",
+            "open_list",
+            "bidir",
+            "path",
+            "start",
+            "end",
         ]
         color_to_key = {COLORS[k]: k for k in LAYER_ORDER}
 
@@ -173,11 +187,7 @@ class Visualizer:
         pygame.draw.rect(self.screen, COLORS["stats_bg"], panel)
 
         if not hasattr(self, "_font_cache"):
-            pygame._freetype.init()
-            import os
-            pygame_pkg = os.path.dirname(pygame.__file__)
-            font_path = os.path.join(pygame_pkg, "freesansbold.ttf")
-            self._font_cache = pygame._freetype.Font(font_path, 16)
+            self._font_cache = pygame.font.Font(None, 24)
 
         lines = [
             f"Status : {self.stats['status']}",
@@ -186,8 +196,8 @@ class Visualizer:
             f"Time   : {self.stats['time_ms']} ms",
         ]
         for i, line in enumerate(lines):
-            surf, _ = self._font_cache.render(line, COLORS["stats_text"])
-            self.screen.blit(surf, (14, self.grid_h + 12 + i * 24))
+            surf = self._font_cache.render(line, True, COLORS["stats_text"])
+            self.screen.blit(surf, (14, self.grid_h + 15 + i * 28))
 
     def _handle_events(self) -> bool:
         for event in pygame.event.get():
@@ -211,14 +221,21 @@ class Visualizer:
             return (r, c)
         return None
 
-    def run(self, result: dict | None = None, animate: bool = False, animation_delay_ms: int = 30):
+    def run(
+        self,
+        result: dict | None = None,
+        animate: bool = False,
+        animation_delay_ms: int = 30,
+    ):
         if result:
-            self.stats.update({
-                "nodes_explored": result.get("nodes_explored", 0),
-                "path_length": len(result.get("path", [])),
-                "time_ms": result.get("time_ms", 0.0),
-                "status": "Path found" if result.get("found") else "No path",
-            })
+            self.stats.update(
+                {
+                    "nodes_explored": result.get("nodes_explored", 0),
+                    "path_length": len(result.get("path", [])),
+                    "time_ms": result.get("time_ms", 0.0),
+                    "status": "Path found" if result.get("found") else "No path",
+                }
+            )
             if result.get("found"):
                 self.mark_path(result["path"])
 
@@ -243,7 +260,13 @@ class Visualizer:
         pygame.quit()
         sys.exit()
 
-    def callback(self, open_positions: set, closed_positions: set, open_b: set | None = None, closed_b: set | None = None):
+    def callback(
+        self,
+        open_positions: set,
+        closed_positions: set,
+        open_b: set | None = None,
+        closed_b: set | None = None,
+    ):
         self.mark_closed(closed_positions)
         self.mark_open(open_positions)
 
@@ -259,8 +282,8 @@ class Visualizer:
                 pygame.quit()
                 sys.exit()
 
-        self.steps = getattr(self, 'steps', 0) + 1
-        
+        self.steps = getattr(self, "steps", 0) + 1
+
         if self.cell_size <= 4:
             if self.steps % 50 == 0:
                 self._draw_frame()
