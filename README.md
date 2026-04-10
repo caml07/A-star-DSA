@@ -2,6 +2,9 @@
 
 El algoritmo este que nos dejo morales :D
 
+<img width="498" height="479" alt="image" src="https://github.com/user-attachments/assets/4f947cf3-e4df-48b1-a792-7f96e155db1a" />
+
+
 ---
 
 ## 👥 División de responsabilidades
