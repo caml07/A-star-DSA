@@ -53,7 +53,7 @@ C = {
 
 
 def _load_image_surface(size):
-    """Load the important.jpg image into a pygame Surface."""
+    """Load the importante.jpg image into a pygame Surface."""
     img_path = os.path.join(os.path.dirname(__file__), "..", "data", "importante.jpg")
     surf = pygame.image.load(img_path)
     return pygame.transform.smoothscale(surf, size)
@@ -168,7 +168,7 @@ def show_maze_menu():
                          (tx, sep_y), (panel.right - 24, sep_y), 1)
 
         # Info tags
-        tags = [("heurística", "Euclidiana"), ("grid", "2D"), ("viz", "Pygame")]
+        tags = [("heurística", "Manhattan"), ("grid", "2D"), ("viz", "Pygame")]
         tag_x = tx
         for label, val in tags:
             lw = font_label.render(f"{label}: ", True, C["subtext"])
@@ -177,7 +177,7 @@ def show_maze_menu():
             screen.blit(vw, (tag_x + lw.get_width(), sep_y + 10))
             tag_x += lw.get_width() + vw.get_width() + 14
 
-        # Instrucción
+        # Instructional
         inst = font_sub.render("Paso 1 de 2  —  Elige el laberinto", True, C["subtext"])
         screen.blit(inst, (panel.x + panel.w//2 - inst.get_width()//2, 248))
 
@@ -336,8 +336,10 @@ def main():
 
     viz = Visualizer(maze)
 
+    algo_name = "Bidireccional ⭐" if algo_choice == "bidirectional" else "A* Estándar"
     state = "waiting_start"
     viz.stats["status"] = "Click izquierdo para elegir inicio"
+    viz.stats["algo"]   = algo_name
 
     running = True
     while running:
@@ -360,6 +362,7 @@ def main():
                         "path_length": 0,
                         "time_ms": 0.0,
                         "status": "Click izquierdo para elegir inicio",
+                        "algo":   algo_name,
                     }
 
             if event.type == pygame.MOUSEBUTTONDOWN:

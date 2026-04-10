@@ -2,7 +2,7 @@
 astar.py — A* Pathfinding Algorithm
 DSA Project | Eduardo
 
-Implementa A* estándar y bidireccional con heurística Euclidiana.
+Implementa A* estándar y bidireccional con heurística Manhattan + tie-breaking.
 Se conecta con Maze (maze.py) y Visualizer (visualizer.py).
 
 Refactor notes (branch fix/astar-cleanup):
@@ -26,10 +26,20 @@ import time
 
 def heuristic(a, b):
     """
-    Distancia Euclidiana — línea recta entre dos puntos en el grid.
-    Sirve como estimación admisible del costo restante hasta el destino.
+    Distancia Manhattan — suma de diferencias absolutas en filas y columnas.
+
+    Es la heurística correcta para grids con movimiento cardinal (4 direcciones),
+    porque el costo mínimo real entre dos celdas ES exactamente la distancia
+    Manhattan cuando no hay paredes. Euclidiana subestima ese costo (da valores
+    como 7.07 cuando el mínimo real es 10), lo que hace que A* expanda muchos
+    nodos innecesarios y se comporte casi como Dijkstra.
+
+    También aplicamos tie-breaking multiplicando por (1 + ε): cuando dos nodos
+    tienen el mismo f, el algoritmo prefiere el que tiene h más alto (más cerca
+    del destino), evitando explorar nodos "laterales" con el mismo costo.
     """
-    return math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
+    manhattan = abs(a[0] - b[0]) + abs(a[1] - b[1])
+    return manhattan * (1 + 1e-4)  # tie-breaking sutil
 
 
 # ─────────────────────────────────────────
