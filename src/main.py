@@ -70,8 +70,8 @@ def get_image_path():
     root.withdraw()
     root.attributes("-topmost", True)
     path = filedialog.askopenfilename(
-        title="Select a Maze Image",
-        filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.bmp")],
+        title="Select a Maze File",
+        filetypes=[("All Supported", "*.png;*.jpg;*.jpeg;*.bmp;*.txt"), ("Images", "*.png;*.jpg;*.jpeg;*.bmp"), ("Text Files", "*.txt")],
     )
     root.destroy()
     return path
@@ -184,7 +184,7 @@ def show_maze_menu():
         # Botones
         for btn, label, sublabel, col in [
             (btn_default, "Default Maze", "maze 10×10 .txt", C["accent"]),
-            (btn_upload,  "Custom Image", "PNG / JPG / BMP", C["purple"]),
+            (btn_upload,  "Custom One", "PNG / JPG / TXT", C["purple"]),
         ]:
             hov = btn.collidepoint(mx, my)
             bg  = C["btn_hov"] if hov else C["btn"]
@@ -305,7 +305,7 @@ def show_algo_menu():
             pygame.draw.rect(screen, col, accent_bar, border_radius=1)
 
             lt = font_btn.render(label, True, C["text"])
-            screen.blit(lt, (btn.centerx - lt.get_width()//2, btn.y + 12))
+            screen.blit(lt, (btn.centerx - lt.get_width()//2, btn.y + 12))  
             for i, line in enumerate(lines):
                 ls = font_label.render(line, True, C["subtext"])
                 screen.blit(ls, (btn.centerx - ls.get_width()//2, btn.y + 36 + i * 18))
@@ -328,7 +328,10 @@ def main():
     if choice == "default":
         maze.load_from_array(DEFAULT_MAZE)
     elif choice == "image":
-        maze.load_from_image(img_path)
+        if img_path.endswith('.txt'):
+            maze.load_from_txt(img_path)
+        else:
+            maze.load_from_image(img_path)
 
     # Pantalla 2 — algoritmo
     algo_choice = show_algo_menu()

@@ -51,6 +51,32 @@ class Maze:
 
         except Exception as e:
             print(f"Error loading image: {e}")
+    def load_from_txt(self, filename): 
+        try:
+            self.grid = []
+            with open(filename, 'r') as f:
+                for line in f:
+                    clean_line = line.strip()
+                    if not clean_line:
+                        continue
+                    
+                    row = []
+                    # Check if the file uses commas (like your default_maze.txt probably does)
+                    if ',' in clean_line:
+                        row = [int(x) for x in clean_line.split(",") if x.strip() in ['0', '1']]
+                    else:
+                        # Otherwise, read it character by character
+                        row = [int(char) for char in clean_line if char in ['0', '1']]
+                    
+                    if row:
+                        self.grid.append(row)
+            
+            self.rows = len(self.grid)
+            self.cols = len(self.grid[0]) if self.rows > 0 else 0
+            print(f"Maze successfully loaded from text file: {self.cols}x{self.rows}")
+            
+        except Exception as e:
+            print(f"Error loading text file: {e}")
 
     def is_wall(self, row, col):
         """Validates if a coordinate is a wall or out of bounds."""
