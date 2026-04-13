@@ -1,5 +1,5 @@
 from PIL import Image
-
+import random
 
 class Maze:
     def __init__(self):
@@ -7,6 +7,51 @@ class Maze:
         self.rows = 0
         self.cols = 0
 
+    def generate_random(self, rows=41, cols=41):
+        """
+        Generates a structured maze using the Recursive Backtracker (DFS) algorithm.
+        Creates continuous corridors instead of random static noise.
+        """
+        self.rows = rows if rows % 2 != 0 else rows + 1
+        self.cols = cols if cols % 2 != 0 else cols + 1
+
+        self.grid = [[1 for _ in range(self.cols)] for _ in range(self.rows)]
+
+        start_r = random.randrange(1, self.rows, 2)
+        start_c = random.randrange(1, self.cols, 2)
+        self.grid[start_r][start_c] = 0
+
+        stack = [(start_r, start_c)]
+
+        directions = [(-2, 0), (2, 0), (0, -2), (0, 2)]
+
+        while stack:
+            current_r, current_c = stack[-1]
+
+            unvisited = []
+            for dr, dc in directions:
+                nr, nc = current_r + dr, current_c + dc
+                if 0 < nr < self.rows - 1 and 0 < nc < self.cols - 1:
+                    if self.grid[nr][nc] == 1: 
+                        unvisited.append((nr, nc, dr, dc))
+
+            if unvisited:
+                nr, nc, dr, dc = random.choice(unvisited)
+
+                self.grid[current_r + dr//2][current_c + dc//2] = 0
+                self.grid[nr][nc] = 0
+
+                stack.append((nr, nc))
+            else:
+                stack.pop()
+
+        
+        for _ in range((self.rows * self.cols) // 15):
+            r = random.randrange(1, self.rows - 1)
+            c = random.randrange(1, self.cols - 1)
+            self.grid[r][c] = 0
+
+        print(f"Structured maze generated: {self.cols}x{self.rows}")
     def load_from_array(self, matrix):
         if not matrix or not matrix[0]:
             raise ValueError("Array cannot be empty.")

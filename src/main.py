@@ -7,7 +7,6 @@ import sys
 import os
 import tkinter as tk
 from tkinter import filedialog
-
 import pygame
 
 sys.path.insert(0, os.path.dirname(__file__))
@@ -65,13 +64,13 @@ def _draw_rounded_rect(surf, color, rect, radius=12, border=0, border_color=None
         pygame.draw.rect(surf, border_color, rect, border, border_radius=radius)
 
 
-def get_image_path():
+def get_file_path():
     root = tk.Tk()
     root.withdraw()
     root.attributes("-topmost", True)
     path = filedialog.askopenfilename(
         title="Select a Maze File",
-        filetypes=[("All Supported", "*.png;*.jpg;*.jpeg;*.bmp;*.txt"), ("Images", "*.png;*.jpg;*.jpeg;*.bmp"), ("Text Files", "*.txt")],
+        filetypes=[("All Supported", "*.png;*.jpg;*.txt"), ("Images", "*.png;*.jpg"), ("Text Files", "*.txt")],
     )
     root.destroy()
     return path
@@ -82,7 +81,6 @@ def get_image_path():
 # ─────────────────────────────────────────
 
 def show_maze_menu():
-    """Pantalla 1: elegir entre maze default o imagen custom."""
     pygame.init()
     W, H = 560, 420
     screen = pygame.display.set_mode((W, H))
@@ -96,15 +94,15 @@ def show_maze_menu():
 
     img = _load_image_surface((130, 130))
 
-    # Botones
-    btn_default = pygame.Rect(W//2 - 160, 280, 150, 52)
-    btn_upload  = pygame.Rect(W//2 + 10,  280, 150, 52)
+    # 3 Botones encogidos para que quepan todos!
+    btn_default = pygame.Rect(35, 280, 140, 52)
+    btn_random  = pygame.Rect(210, 280, 140, 52)
+    btn_upload  = pygame.Rect(385, 280, 140, 52)
 
-    tick = 0
+    mx, my = 0, 0
 
     while True:
         clock.tick(60)
-        tick += 1
         mx, my = pygame.mouse.get_pos()
 
         for event in pygame.event.get():
@@ -115,45 +113,36 @@ def show_maze_menu():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if btn_default.collidepoint(event.pos):
                     return "default", None
+                if btn_random.collidepoint(event.pos):
+                    return "random", None
                 if btn_upload.collidepoint(event.pos):
-                    path = get_image_path()
+                    path = get_file_path()
                     if path:
-                        return "image", path
+                        return "upload", path
 
         screen.fill(C["bg"])
 
-        # Sutil grid de puntos de fondo
         for gx in range(0, W, 28):
             for gy in range(0, H, 28):
                 pygame.draw.circle(screen, C["border"], (gx, gy), 1)
 
-        # Panel central
         panel = pygame.Rect(40, 24, W - 80, H - 48)
-        _draw_rounded_rect(screen, C["panel"], panel, radius=16,
-                           border=1, border_color=C["border"])
+        _draw_rounded_rect(screen, C["panel"], panel, radius=16, border=1, border_color=C["border"])
 
-        # Imagen — lado izquierdo del panel
         img_x = panel.x + 24
         img_y = panel.y + 24
         img_rect = pygame.Rect(img_x, img_y, 130, 130)
-        # Marco con borde accent
-        _draw_rounded_rect(screen, C["border"],
-                           img_rect.inflate(4, 4), radius=10)
+        _draw_rounded_rect(screen, C["border"], img_rect.inflate(4, 4), radius=10)
         screen.blit(img, (img_x, img_y))
 
-        # Badge encima de la imagen
         badge_text = font_label.render("imagen importante", True, C["accent"])
         bx = img_x + 130//2 - badge_text.get_width()//2
-        pygame.draw.rect(screen, C["btn_sel"],
-                         pygame.Rect(bx - 6, img_y - 20, badge_text.get_width() + 12, 18),
-                         border_radius=4)
+        pygame.draw.rect(screen, C["btn_sel"], pygame.Rect(bx - 6, img_y - 20, badge_text.get_width() + 12, 18), border_radius=4)
         screen.blit(badge_text, (bx, img_y - 18))
 
-        # Texto lado derecho
         tx = img_x + 130 + 20
         ty = panel.y + 28
 
-        # Título con acento de color
         t1 = font_title.render("A*", True, C["accent"])
         t2 = font_title.render(" Pathfinding", True, C["text"])
         screen.blit(t1, (tx, ty))
@@ -162,12 +151,9 @@ def show_maze_menu():
         sub1 = font_sub.render("DSA Project  ·  Eduardo / Steven / Luis", True, C["subtext"])
         screen.blit(sub1, (tx, ty + 30))
 
-        # Línea separadora
         sep_y = ty + 52
-        pygame.draw.line(screen, C["border"],
-                         (tx, sep_y), (panel.right - 24, sep_y), 1)
+        pygame.draw.line(screen, C["border"], (tx, sep_y), (panel.right - 24, sep_y), 1)
 
-        # Info tags
         tags = [("heurística", "Manhattan"), ("grid", "2D"), ("viz", "Pygame")]
         tag_x = tx
         for label, val in tags:
@@ -177,21 +163,18 @@ def show_maze_menu():
             screen.blit(vw, (tag_x + lw.get_width(), sep_y + 10))
             tag_x += lw.get_width() + vw.get_width() + 14
 
-        # Instructional
         inst = font_sub.render("Paso 1 de 2  —  Elige el laberinto", True, C["subtext"])
         screen.blit(inst, (panel.x + panel.w//2 - inst.get_width()//2, 248))
 
-        # Botones
+        # Botones actualizados
         for btn, label, sublabel, col in [
-            (btn_default, "Default Maze", "maze 10×10 .txt", C["accent"]),
-            (btn_upload,  "Custom One", "PNG / JPG / TXT", C["purple"]),
+            (btn_default, "Default Maze", "10×10 .txt", C["accent"]),
+            (btn_random,  "Random Maze", "Generado Auto", C["green"]),
+            (btn_upload,  "Custom File", "PNG / JPG / TXT", C["purple"]),
         ]:
             hov = btn.collidepoint(mx, my)
             bg  = C["btn_hov"] if hov else C["btn"]
-            _draw_rounded_rect(screen, bg, btn, radius=10,
-                               border=1, border_color=col)
-
-            # Línea de acento superior
+            _draw_rounded_rect(screen, bg, btn, radius=10, border=1, border_color=col)
             accent_bar = pygame.Rect(btn.x + 10, btn.y, btn.w - 20, 2)
             pygame.draw.rect(screen, col, accent_bar, border_radius=1)
 
@@ -200,13 +183,9 @@ def show_maze_menu():
             screen.blit(lt, (btn.centerx - lt.get_width()//2, btn.y + 10))
             screen.blit(ls, (btn.centerx - ls.get_width()//2, btn.y + 30))
 
-        # Footer
         footer = font_label.render("ESC para salir", True, C["border"])
         screen.blit(footer, (W//2 - footer.get_width()//2, H - 30))
-
         pygame.display.flip()
-
-    return "default", None
 
 
 # ─────────────────────────────────────────
@@ -214,7 +193,6 @@ def show_maze_menu():
 # ─────────────────────────────────────────
 
 def show_algo_menu():
-    """Pantalla 2: elegir entre A* estándar y Bidireccional."""
     W, H = 560, 380
     screen = pygame.display.set_mode((W, H))
     pygame.display.set_caption("A* Pathfinding — DSA Project")
@@ -225,10 +203,11 @@ def show_algo_menu():
     font_btn   = pygame.font.SysFont("consolas", 14, bold=True)
     font_label = pygame.font.SysFont("consolas", 11)
 
-    btn_std  = pygame.Rect(W//2 - 200, 220, 175, 90)
+    btn_std   = pygame.Rect(W//2 - 200, 220, 175, 90)
     btn_bidir = pygame.Rect(W//2 + 25,  220, 175, 90)
-
-    selected = None
+    
+    # EL BOTON DE VOLVER PARA EL PROFESOR
+    btn_back  = pygame.Rect(20, 20, 70, 30)
 
     while True:
         clock.tick(60)
@@ -240,23 +219,25 @@ def show_algo_menu():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 pygame.quit(); sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if btn_std.collidepoint(event.pos):
-                    return "standard"
-                if btn_bidir.collidepoint(event.pos):
-                    return "bidirectional"
+                if btn_std.collidepoint(event.pos): return "standard"
+                if btn_bidir.collidepoint(event.pos): return "bidirectional"
+                if btn_back.collidepoint(event.pos): return "back" # Regresa al menu 1!
 
         screen.fill(C["bg"])
-
-        # Fondo punteado
         for gx in range(0, W, 28):
             for gy in range(0, H, 28):
                 pygame.draw.circle(screen, C["border"], (gx, gy), 1)
 
         panel = pygame.Rect(40, 24, W - 80, H - 48)
-        _draw_rounded_rect(screen, C["panel"], panel, radius=16,
-                           border=1, border_color=C["border"])
+        _draw_rounded_rect(screen, C["panel"], panel, radius=16, border=1, border_color=C["border"])
 
-        # Header
+        # Dibujar Botón de Volver
+        hov_back = btn_back.collidepoint(mx, my)
+        bg_back = C["btn_hov"] if hov_back else C["btn"]
+        _draw_rounded_rect(screen, bg_back, btn_back, radius=6, border=1, border_color=C["border"])
+        tb = font_label.render("<- Volver", True, C["subtext"])
+        screen.blit(tb, (btn_back.centerx - tb.get_width()//2, btn_back.centery - tb.get_height()//2))
+
         t1 = font_title.render("A*", True, C["accent"])
         t2 = font_title.render(" Pathfinding", True, C["text"])
         cx = W//2 - (t1.get_width() + t2.get_width())//2
@@ -267,20 +248,12 @@ def show_algo_menu():
         screen.blit(inst, (W//2 - inst.get_width()//2, 76))
 
         sep_y = 104
-        pygame.draw.line(screen, C["border"], (panel.x + 20, sep_y),
-                         (panel.right - 20, sep_y), 1)
+        pygame.draw.line(screen, C["border"], (panel.x + 20, sep_y), (panel.right - 20, sep_y), 1)
 
-        # Descripción
-        desc = font_sub.render(
-            "Ambos encuentran el camino óptimo — el bidireccional explora menos nodos.",
-            True, C["subtext"])
+        desc = font_sub.render("Ambos encuentran el camino óptimo — el bidireccional explora menos nodos.", True, C["subtext"])
         screen.blit(desc, (W//2 - desc.get_width()//2, 116))
 
-        # Stats visuales
-        stats = [
-            ("velocidad",  "●●●●●", "●●●○○"),
-            ("nodos",      "más",   "menos"),
-        ]
+        stats = [("velocidad",  "●●●●●", "●●●○○"), ("nodos",      "más",   "menos")]
         sx = W//2 - 120
         for i, (lbl, va, vb) in enumerate(stats):
             ly = 158 + i * 22
@@ -291,7 +264,6 @@ def show_algo_menu():
             screen.blit(la, (sx + 10,  ly))
             screen.blit(lb, (sx + 130, ly))
 
-        # Botones
         configs = [
             (btn_std,   "A* Estándar",       ["un frente de búsqueda", "clásico y confiable"], C["accent"]),
             (btn_bidir, "Bidireccional ⭐",   ["dos frentes simultáneos", "extra del proyecto"], C["purple"]),
@@ -299,116 +271,119 @@ def show_algo_menu():
         for btn, label, lines, col in configs:
             hov = btn.collidepoint(mx, my)
             bg  = C["btn_hov"] if hov else C["btn"]
-            _draw_rounded_rect(screen, bg, btn, radius=10,
-                               border=1, border_color=col)
+            _draw_rounded_rect(screen, bg, btn, radius=10, border=1, border_color=col)
             accent_bar = pygame.Rect(btn.x + 10, btn.y, btn.w - 20, 2)
             pygame.draw.rect(screen, col, accent_bar, border_radius=1)
 
             lt = font_btn.render(label, True, C["text"])
-            screen.blit(lt, (btn.centerx - lt.get_width()//2, btn.y + 12))  
+            screen.blit(lt, (btn.centerx - lt.get_width()//2, btn.y + 12))
             for i, line in enumerate(lines):
                 ls = font_label.render(line, True, C["subtext"])
                 screen.blit(ls, (btn.centerx - ls.get_width()//2, btn.y + 36 + i * 18))
 
         footer = font_label.render("ESC para salir", True, C["border"])
         screen.blit(footer, (W//2 - footer.get_width()//2, H - 30))
-
         pygame.display.flip()
 
 
 # ─────────────────────────────────────────
-#  Main Application
+#  Main Application Master Loop
 # ─────────────────────────────────────────
 
 def main():
-    # Pantalla 1 — maze
-    choice, img_path = show_maze_menu()
+    # EL LOOP MAESTRO: Evita que el programa se cierre al salir de una pantalla
+    while True:
+        
+        # 1. Menú Principal
+        choice, file_path = show_maze_menu()
 
-    maze = Maze()
-    if choice == "default":
-        maze.load_from_array(DEFAULT_MAZE)
-    elif choice == "image":
-        if img_path.endswith('.txt'):
-            maze.load_from_txt(img_path)
-        else:
-            maze.load_from_image(img_path)
+        maze = Maze()
+        if choice == "default":
+            maze.load_from_array(DEFAULT_MAZE)
+        elif choice == "random":
+            maze.generate_random(41, 41) # 25% de muros!
+        elif choice == "upload":
+            if file_path.endswith('.txt'):
+                maze.load_from_txt(file_path)
+            else:
+                maze.load_from_image(file_path)
 
-    # Pantalla 2 — algoritmo
-    algo_choice = show_algo_menu()
-    algo = astar_bidirectional if algo_choice == "bidirectional" else astar
+        # 2. Menú Algoritmo
+        algo_choice = show_algo_menu()
+        if algo_choice == "back":
+            continue # Si el usuario dio a Volver, reiniciamos el loop al menu principal!
 
-    viz = Visualizer(maze)
+        algo = astar_bidirectional if algo_choice == "bidirectional" else astar
+        algo_name = "Bidireccional ⭐" if algo_choice == "bidirectional" else "A* Estándar"
 
-    algo_name = "Bidireccional ⭐" if algo_choice == "bidirectional" else "A* Estándar"
-    state = "waiting_start"
-    viz.stats["status"] = "Click izquierdo para elegir inicio"
-    viz.stats["algo"]   = algo_name
+        # 3. Visualizador
+        viz = Visualizer(maze)
+        state = "waiting_start"
+        
+        # Agregamos la instrucción de la tecla "M" para volver al menú
+        viz.stats["status"] = "Click izq: Inicio | M: Volver al Menú"
+        viz.stats["algo"]   = algo_name
 
-    running = True
-    while running:
-        viz.clock.tick(60)
+        running = True
+        while running:
+            viz.clock.tick(60)
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit(); sys.exit()
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    running = False
-                if event.key == pygame.K_r:
-                    viz._init_cell_colors()
-                    viz.start = None
-                    viz.end = None
-                    state = "waiting_start"
-                    viz.stats = {
-                        "nodes_explored": 0,
-                        "path_length": 0,
-                        "time_ms": 0.0,
-                        "status": "Click izquierdo para elegir inicio",
-                        "algo":   algo_name,
-                    }
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pos = viz._pixel_to_cell(*pygame.mouse.get_pos())
-                if not pos or maze.is_wall(*pos):
-                    continue
-
-                if event.button == 1 and state in ("waiting_start", "done"):
-                    if state == "done":
-                        viz.reset_search_colors()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.quit(); sys.exit()
+                        
+                    # LA TECLA "M" ROMPE EL LOOP DEL VISUALIZADOR Y REGRESA AL MENÚ
+                    if event.key == pygame.K_m:
+                        running = False
+                        
+                    if event.key == pygame.K_r:
+                        viz._init_cell_colors()
+                        viz.start = None
                         viz.end = None
-                        viz.stats["status"] = "Click izquierdo para elegir inicio"
-                    viz.set_start(pos)
-                    state = "waiting_end"
-                    viz.stats["status"] = "Click derecho para elegir destino"
+                        state = "waiting_start"
+                        viz.stats = {
+                            "nodes_explored": 0, "path_length": 0, "time_ms": 0.0,
+                            "status": "Click izq: Inicio | M: Volver al Menú",
+                            "algo":   algo_name,
+                        }
 
-                elif event.button == 3 and state == "waiting_end":
-                    viz.set_end(pos)
-                    viz.stats["status"] = "Buscando..."
-                    viz._draw_frame()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    pos = viz._pixel_to_cell(*pygame.mouse.get_pos())
+                    if not pos or maze.is_wall(*pos): continue
 
-                    result = algo(maze, viz.start, viz.end, callback=viz.callback)
+                    if event.button == 1 and state in ("waiting_start", "done"):
+                        if state == "done":
+                            viz.reset_search_colors()
+                            viz.end = None
+                        viz.set_start(pos)
+                        state = "waiting_end"
+                        viz.stats["status"] = "Click der: Destino | M: Volver al Menú"
 
-                    viz.stats.update({
-                        "nodes_explored": result["nodes_explored"],
-                        "path_length": len(result["path"]),
-                        "time_ms": result["time_ms"],
-                        "status": (
-                            f"[{'Bidireccional' if algo_choice == 'bidirectional' else 'A* Estándar'}] "
-                            + ("Camino encontrado ✓  |  R para reiniciar"
-                               if result["found"]
-                               else "Sin camino ✗  |  R para reiniciar")
-                        ),
-                    })
-                    if result["found"]:
-                        viz.mark_path(result["path"])
+                    elif event.button == 3 and state == "waiting_end":
+                        viz.set_end(pos)
+                        viz.stats["status"] = "Buscando..."
+                        viz._draw_frame()
 
-                    state = "done"
+                        result = algo(maze, viz.start, viz.end, callback=viz.callback)
 
-        viz._draw_frame()
+                        viz.stats.update({
+                            "nodes_explored": result["nodes_explored"],
+                            "path_length": len(result["path"]),
+                            "time_ms": result["time_ms"],
+                            "status": (
+                                f"[{'Bidireccional' if algo_choice == 'bidirectional' else 'Estándar'}] "
+                                + ("Encontrado ✓  |  R: Reiniciar | M: Menú" if result["found"] else "Sin camino ✗  |  R: Reiniciar | M: Menú")
+                            ),
+                        })
+                        if result["found"]:
+                            viz.mark_path(result["path"])
+                        state = "done"
 
-    pygame.quit()
-    sys.exit()
+            viz._draw_frame()
 
 
 if __name__ == "__main__":
