@@ -52,7 +52,6 @@ C = {
 
 
 def _load_image_surface(size):
-    """Load the importante.jpg image into a pygame Surface."""
     img_path = os.path.join(os.path.dirname(__file__), "..", "data", "importante.jpg")
     surf = pygame.image.load(img_path)
     return pygame.transform.smoothscale(surf, size)
@@ -92,9 +91,12 @@ def show_maze_menu():
     font_btn    = pygame.font.SysFont("consolas", 14, bold=True)
     font_label  = pygame.font.SysFont("consolas", 11)
 
-    img = _load_image_surface((130, 130))
+    try:
+        img = _load_image_surface((130, 130))
+    except:
+        img = pygame.Surface((130, 130))
+        img.fill((50, 50, 50))
 
-    # 3 Botones encogidos para que quepan todos!
     btn_default = pygame.Rect(35, 280, 140, 52)
     btn_random  = pygame.Rect(210, 280, 140, 52)
     btn_upload  = pygame.Rect(385, 280, 140, 52)
@@ -111,14 +113,11 @@ def show_maze_menu():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 pygame.quit(); sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if btn_default.collidepoint(event.pos):
-                    return "default", None
-                if btn_random.collidepoint(event.pos):
-                    return "random", None
+                if btn_default.collidepoint(event.pos): return "default", None
+                if btn_random.collidepoint(event.pos): return "random", None
                 if btn_upload.collidepoint(event.pos):
                     path = get_file_path()
-                    if path:
-                        return "upload", path
+                    if path: return "upload", path
 
         screen.fill(C["bg"])
 
@@ -166,7 +165,6 @@ def show_maze_menu():
         inst = font_sub.render("Paso 1 de 2  —  Elige el laberinto", True, C["subtext"])
         screen.blit(inst, (panel.x + panel.w//2 - inst.get_width()//2, 248))
 
-        # Botones actualizados
         for btn, label, sublabel, col in [
             (btn_default, "Default Maze", "10×10 .txt", C["accent"]),
             (btn_random,  "Random Maze", "Generado Auto", C["green"]),
@@ -205,8 +203,6 @@ def show_algo_menu():
 
     btn_std   = pygame.Rect(W//2 - 200, 220, 175, 90)
     btn_bidir = pygame.Rect(W//2 + 25,  220, 175, 90)
-    
-    # EL BOTON DE VOLVER PARA EL PROFESOR
     btn_back  = pygame.Rect(20, 20, 70, 30)
 
     while True:
@@ -214,14 +210,12 @@ def show_algo_menu():
         mx, my = pygame.mouse.get_pos()
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit(); sys.exit()
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                pygame.quit(); sys.exit()
+            if event.type == pygame.QUIT: pygame.quit(); sys.exit()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE: pygame.quit(); sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if btn_std.collidepoint(event.pos): return "standard"
                 if btn_bidir.collidepoint(event.pos): return "bidirectional"
-                if btn_back.collidepoint(event.pos): return "back" # Regresa al menu 1!
+                if btn_back.collidepoint(event.pos): return "back"
 
         screen.fill(C["bg"])
         for gx in range(0, W, 28):
@@ -231,7 +225,6 @@ def show_algo_menu():
         panel = pygame.Rect(40, 24, W - 80, H - 48)
         _draw_rounded_rect(screen, C["panel"], panel, radius=16, border=1, border_color=C["border"])
 
-        # Dibujar Botón de Volver
         hov_back = btn_back.collidepoint(mx, my)
         bg_back = C["btn_hov"] if hov_back else C["btn"]
         _draw_rounded_rect(screen, bg_back, btn_back, radius=6, border=1, border_color=C["border"])
@@ -290,38 +283,63 @@ def show_algo_menu():
 #  Main Application Master Loop
 # ─────────────────────────────────────────
 
+# Clase de seguridad por si no encuentra los efectos de sonido
+class DummySound:
+    def play(self, *args, **kwargs): pass
+    def stop(self): pass
+
 def main():
-    # EL LOOP MAESTRO: Evita que el programa se cierre al salir de una pantalla
-    while True:
+    pygame.init()
+
+    # --- SETUP DE AUDIO (BALATRO) ---
+    music_paused = False
+    
+    # 1. Cargar Música de Fondo
+    try:
+        music_path = os.path.join(os.path.dirname(__file__), "..", "music", "Shop Theme - Balatro.mp3")
+        pygame.mixer.music.load(music_path)
+        pygame.mixer.music.set_volume(0.1)
+        pygame.mixer.music.play(-1) 
+    except Exception as e:
+        print(f"Error cargando música: {e}")
+
+    try:
+        sfx_place_path = os.path.join(os.path.dirname(__file__), "..", "music", "multhit1.ogg")
+        sfx_search_path = os.path.join(os.path.dirname(__file__), "..", "music", "multhit2.ogg")
         
-        # 1. Menú Principal
+        print(f"Buscando sonido de colocar en: {sfx_place_path}")
+        
+        sfx_place = pygame.mixer.Sound(sfx_place_path)
+        sfx_search = pygame.mixer.Sound(sfx_search_path)
+        sfx_place.set_volume(0.1)
+        sfx_search.set_volume(0.1) 
+        print("✅ ¡Efectos de sonido cargados correctamente!")
+        
+    except Exception as e:
+        print(f"\n🚨 ERROR CARGANDO SFX: {e} 🚨\n")
+        sfx_place = DummySound()
+        sfx_search = DummySound()
+
+    while True:
         choice, file_path = show_maze_menu()
 
         maze = Maze()
-        if choice == "default":
-            maze.load_from_array(DEFAULT_MAZE)
-        elif choice == "random":
-            maze.generate_random(41, 41) # 25% de muros!
+        if choice == "default": maze.load_from_array(DEFAULT_MAZE)
+        elif choice == "random": maze.generate_random(41, 41) 
         elif choice == "upload":
-            if file_path.endswith('.txt'):
-                maze.load_from_txt(file_path)
-            else:
-                maze.load_from_image(file_path)
+            if file_path.endswith('.txt'): maze.load_from_txt(file_path)
+            else: maze.load_from_image(file_path)
 
-        # 2. Menú Algoritmo
         algo_choice = show_algo_menu()
-        if algo_choice == "back":
-            continue # Si el usuario dio a Volver, reiniciamos el loop al menu principal!
+        if algo_choice == "back": continue
 
         algo = astar_bidirectional if algo_choice == "bidirectional" else astar
         algo_name = "Bidireccional ⭐" if algo_choice == "bidirectional" else "A* Estándar"
 
-        # 3. Visualizador
         viz = Visualizer(maze)
         state = "waiting_start"
         
-        # Agregamos la instrucción de la tecla "M" para volver al menú
-        viz.stats["status"] = "Click izq: Inicio | M: Volver al Menú"
+        viz.stats["status"] = "Izq: Inicio | Der: Destino | M: Menú | P: Pausa"
         viz.stats["algo"]   = algo_name
 
         running = True
@@ -329,16 +347,19 @@ def main():
             viz.clock.tick(60)
 
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit(); sys.exit()
+                if event.type == pygame.QUIT: pygame.quit(); sys.exit()
 
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        pygame.quit(); sys.exit()
-                        
-                    # LA TECLA "M" ROMPE EL LOOP DEL VISUALIZADOR Y REGRESA AL MENÚ
-                    if event.key == pygame.K_m:
-                        running = False
+                    if event.key == pygame.K_ESCAPE: pygame.quit(); sys.exit()
+                    if event.key == pygame.K_m: running = False
+
+                    if event.key == pygame.K_p:
+                        if music_paused:
+                            pygame.mixer.music.unpause()
+                            music_paused = False
+                        else:
+                            pygame.mixer.music.pause()
+                            music_paused = True
                         
                     if event.key == pygame.K_r:
                         viz._init_cell_colors()
@@ -347,7 +368,7 @@ def main():
                         state = "waiting_start"
                         viz.stats = {
                             "nodes_explored": 0, "path_length": 0, "time_ms": 0.0,
-                            "status": "Click izq: Inicio | M: Volver al Menú",
+                            "status": "Izq: Inicio | Der: Destino | M: Menú | P: Pausa",
                             "algo":   algo_name,
                         }
 
@@ -360,23 +381,37 @@ def main():
                             viz.reset_search_colors()
                             viz.end = None
                         viz.set_start(pos)
+                        
+                        # ¡REPRODUCIR SONIDO AL PONER EL START!
+                        sfx_place.play() 
+                        
                         state = "waiting_end"
-                        viz.stats["status"] = "Click der: Destino | M: Volver al Menú"
+                        viz.stats["status"] = "Der: Destino | M: Menú | P: Pausa"
 
                     elif event.button == 3 and state == "waiting_end":
                         viz.set_end(pos)
+                        
+                        # ¡REPRODUCIR SONIDO AL PONER EL END!
+                        sfx_place.play() 
+                        
                         viz.stats["status"] = "Buscando..."
                         viz._draw_frame()
 
+                        # ¡EMPEZAR A LOOPEAR EL SONIDO DE BÚSQUEDA!
+                        sfx_search.play(loops=-1) 
+                        
                         result = algo(maze, viz.start, viz.end, callback=viz.callback)
+                        
+                        # ¡DETENER EL SONIDO DE BÚSQUEDA CUANDO TERMINE EL ALGORITMO!
+                        sfx_search.stop() 
 
                         viz.stats.update({
                             "nodes_explored": result["nodes_explored"],
                             "path_length": len(result["path"]),
                             "time_ms": result["time_ms"],
                             "status": (
-                                f"[{'Bidireccional' if algo_choice == 'bidirectional' else 'Estándar'}] "
-                                + ("Encontrado ✓  |  R: Reiniciar | M: Menú" if result["found"] else "Sin camino ✗  |  R: Reiniciar | M: Menú")
+                                f"[{'Bidir' if algo_choice == 'bidirectional' else 'Std'}] "
+                                + ("Encontrado ✓ | R: Reset | P: Pausa" if result["found"] else "Sin camino ✗ | R: Reset")
                             ),
                         })
                         if result["found"]:
@@ -384,7 +419,6 @@ def main():
                         state = "done"
 
             viz._draw_frame()
-
 
 if __name__ == "__main__":
     main()
