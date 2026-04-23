@@ -296,9 +296,9 @@ def main():
     
     # 1. Cargar Música de Fondo
     try:
-        music_path = os.path.join(os.path.dirname(__file__), "..", "music", "Shop Theme - Balatro.mp3")
+        music_path = os.path.join(os.path.dirname(__file__), "..", "music", "Balatro OST -  But all tracks play simultaneously.mp3")
         pygame.mixer.music.load(music_path)
-        pygame.mixer.music.set_volume(0.1)
+        pygame.mixer.music.set_volume(0.2)
         pygame.mixer.music.play(-1) 
     except Exception as e:
         print(f"Error cargando música: {e}")
