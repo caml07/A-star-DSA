@@ -298,11 +298,7 @@ def main():
     try:
         music_path = os.path.join(os.path.dirname(__file__), "..", "music", "Balatro OST -  But all tracks play simultaneously.mp3")
         pygame.mixer.music.load(music_path)
-<<<<<<< HEAD
         pygame.mixer.music.set_volume(0.2)
-=======
-        pygame.mixer.music.set_volume(0.5)
->>>>>>> 8a8723cbf9f2748172652c68ac0c5071821a5092
         pygame.mixer.music.play(-1) 
     except Exception as e:
         print(f"Error cargando música: {e}")
