@@ -1,0 +1,188 @@
+
+<style>
+  .rm-wrap { padding: 16px 0; font-family: var(--font-sans); }
+  .rm-header { margin-bottom: 18px; }
+  .rm-title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 4px; }
+  .rm-sub { font-size: 13px; color: var(--color-text-secondary); }
+  .phase { margin-bottom: 14px; border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); overflow: hidden; }
+  .phase-header { padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+  .phase-label { font-size: 13px; font-weight: 500; }
+  .phase-day { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+  .phase-toggle { margin-left: auto; font-size: 13px; color: var(--color-text-secondary); transition: transform .2s; }
+  .phase-toggle.open { transform: rotate(180deg); }
+  .tasks { padding: 0 14px 12px; display: flex; flex-direction: column; gap: 8px; }
+  .task { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); }
+  .task-check { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--color-border-secondary); flex-shrink: 0; margin-top: 1px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+  .task-check.done { background: var(--color-text-success); border-color: var(--color-text-success); }
+  .task-check.done::after { content: ''; display: block; width: 8px; height: 5px; border-left: 1.5px solid #fff; border-bottom: 1.5px solid #fff; transform: rotate(-45deg) translateY(-1px); }
+  .task-body { flex: 1; }
+  .task-name { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 2px; }
+  .task-name.done-text { text-decoration: line-through; color: var(--color-text-tertiary); }
+  .task-desc { font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; }
+  .task-meta { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .badge { font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 20px; }
+  .badge-s { background: #E6F1FB; color: #0C447C; }
+  .badge-l { background: #EAF3DE; color: #27500A; }
+  .badge-e { background: #FAEEDA; color: #633806; }
+  .badge-t { background: #EEEDFE; color: #3C3489; }
+  .badge-all { background: var(--color-background-tertiary); color: var(--color-text-secondary); }
+  @media (prefers-color-scheme: dark) {
+    .badge-s { background: #0C447C; color: #B5D4F4; }
+    .badge-l { background: #27500A; color: #C0DD97; }
+    .badge-e { background: #633806; color: #FAC775; }
+    .badge-t { background: #3C3489; color: #CECBF6; }
+  }
+  .extra-tag { font-size: 11px; padding: 2px 7px; border-radius: 20px; background: #FAEEDA; color: #633806; font-weight: 500; }
+  @media (prefers-color-scheme: dark) {
+    .extra-tag { background: #633806; color: #FAC775; }
+  }
+  .legend { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--color-text-secondary); }
+  .progress-bar { height: 4px; border-radius: 2px; background: var(--color-border-tertiary); margin-bottom: 16px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 2px; background: var(--color-text-success); transition: width .3s; }
+  .progress-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 6px; }
+</style>
+<div class="rm-wrap">
+  <div class="rm-header">
+    <div class="rm-title">Roadmap — A* DSA Project</div>
+    <div class="rm-sub">Semana y media · Miércoles/Viernes · Steven, Luis, Eduardo</div>
+  </div>
+
+  <div class="legend">
+    <span style="font-size:12px; color:var(--color-text-secondary); font-weight:500;">Responsable:</span>
+    <span class="legend-item"><span class="badge badge-s">S</span> Steven</span>
+    <span class="legend-item"><span class="badge badge-l">L</span> Luis</span>
+    <span class="legend-item"><span class="badge badge-e">E</span> Eduardo</span>
+    <span class="legend-item"><span class="badge badge-t">⭐</span> Extra highlight</span>
+  </div>
+
+  <div class="progress-label" id="prog-label">0 de 0 tareas completadas</div>
+  <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+
+  <div id="phases"></div>
+</div>
+
+<script>
+const phases = [
+  {
+    id: 'p1',
+    label: 'Fase 1 — Setup & fundamentos',
+    day: 'Días 1–2 · Hoy y mañana',
+    color: '#378ADD',
+    tasks: [
+      { id: 't1', name: 'Crear repo privado en GitHub', desc: 'Inicializar con README, .gitignore para Python, estructura de carpetas básica: /src, /assets, /tests, /docs.', who: ['E'], extra: false },
+      { id: 't2', name: 'Añadir a Steven y Luis como colaboradores', desc: 'Invitarlos desde Settings → Collaborators. Acordar branch strategy (main + feature branches).', who: ['E'], extra: false },
+      { id: 't3', name: 'Diseñar estructura del proyecto', desc: 'Decidir: maze.py, astar.py, visualizer.py, main.py. Documentar en README quién toca qué archivo.', who: ['E', 'S', 'L'], extra: false },
+      { id: 't4', name: 'Implementar clase Maze (base)', desc: 'Grid 2D, carga desde matriz o archivo, validación de paredes. Debe soportar cualquier tamaño de maze.', who: ['S'], extra: false },
+      { id: 't5', name: 'Setup de Pygame + ventana base', desc: 'Ventana, loop principal, render del grid, colores para celdas (vacío, pared, inicio, fin, path).', who: ['L'], extra: false },
+    ]
+  },
+  {
+    id: 'p2',
+    label: 'Fase 2 — Core del A*',
+    day: 'Días 3–5',
+    color: '#1D9E75',
+    tasks: [
+      { id: 't6', name: 'Implementar A* estándar (Eduardo)', desc: 'Open/closed list, heurística Manhattan, reconstrucción del path. Bien documentado para presentación.', who: ['E'], extra: false },
+      { id: 't7', name: 'Heurísticas configurables', desc: 'Manhattan (default), Euclidiana, Diagonal. Parámetro al momento de ejecutar para fácil demostración.', who: ['E'], extra: false },
+      { id: 't8', name: 'Selector de inicio y fin con mouse', desc: 'Click izquierdo = inicio, click derecho = fin. Validar que no caigan en paredes. Rerender en tiempo real.', who: ['L'], extra: false },
+      { id: 't9', name: 'Visualizar nodos explorados en tiempo real', desc: 'Colorear open list (amarillo), closed list (naranja) mientras el algoritmo corre. Ayuda mucho en presentación.', who: ['L'], extra: false },
+      { id: 't10', name: 'Unit tests del algoritmo', desc: 'Al menos 3 casos: path existe, no hay path, inicio==fin. Verificar que el path retornado es óptimo.', who: ['S'], extra: false },
+    ]
+  },
+  {
+    id: 'p3',
+    label: 'Fase 3 — Features de presentación',
+    day: 'Días 6–8',
+    color: '#BA7517',
+    tasks: [
+      { id: 't11', name: 'Cargar maze desde archivo', desc: 'Formato .txt o .json con 1s y 0s. Permite correr el mismo maze fijo que el profe dé, sin hardcodear.', who: ['S'], extra: false },
+      { id: 't12', name: 'Panel de estadísticas en pantalla', desc: 'Nodos explorados, longitud del path, tiempo de ejecución (ms). Se ve muy pro en la demo.', who: ['L'], extra: false },
+      { id: 't13', name: 'Animación paso a paso con velocidad ajustable', desc: 'Slider o teclas para controlar la velocidad de la visualización. Clave para la presentación.', who: ['L', 'E'], extra: false },
+      { id: 't14', name: '⭐ Bidirectional A* (extra)', desc: 'Dos frentes de búsqueda simultáneos: desde inicio y desde fin. Se encuentran en el medio. Diferenciador vs el resto del salón.', who: ['E'], extra: true },
+    ]
+  },
+  {
+    id: 'p4',
+    label: 'Fase 4 — Polish & presentación',
+    day: 'Días 9–10 · Últimos días',
+    color: '#533AB7',
+    tasks: [
+      { id: 't15', name: 'UI/UX final del visualizador', desc: 'Colores consistentes, fuente legible, leyenda de colores, título del proyecto en pantalla.', who: ['L'], extra: false },
+      { id: 't16', name: 'README completo con instrucciones', desc: 'Cómo instalar (pip install pygame), cómo correr, cómo cargar un maze custom, capturas de pantalla.', who: ['S'], extra: false },
+      { id: 't17', name: 'Preparar demo script para presentación', desc: 'Qué teclas presionar, en qué orden mostrar features. Practicar al menos 1 vez en grupo.', who: ['E', 'S', 'L'], extra: false },
+      { id: 't18', name: 'Code review en grupo', desc: 'Pull requests de cada branch a main. Revisar que el código esté comentado y limpio para que el profe lo vea bien.', who: ['E', 'S', 'L'], extra: false },
+    ]
+  }
+];
+
+const whoClass = { E: 'badge-e', S: 'badge-s', L: 'badge-l' };
+const whoName = { E: 'Eduardo', S: 'Steven', L: 'Luis' };
+const done = new Set();
+let total = 0;
+
+function updateProgress() {
+  const pct = total === 0 ? 0 : Math.round((done.size / total) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = done.size + ' de ' + total + ' tareas completadas (' + pct + '%)';
+}
+
+function renderPhases() {
+  const container = document.getElementById('phases');
+  phases.forEach(ph => {
+    total += ph.tasks.length;
+    const el = document.createElement('div');
+    el.className = 'phase';
+    el.innerHTML = `
+      <div class="phase-header" onclick="togglePhase('${ph.id}')">
+        <div style="width:10px;height:10px;border-radius:50%;background:${ph.color};flex-shrink:0"></div>
+        <span class="phase-label" style="color:var(--color-text-primary)">${ph.label}</span>
+        <span class="phase-day badge badge-all">${ph.day}</span>
+        <span class="phase-toggle open" id="toggle-${ph.id}">▾</span>
+      </div>
+      <div class="tasks" id="tasks-${ph.id}">
+        ${ph.tasks.map(t => `
+          <div class="task" id="task-${t.id}">
+            <div class="task-check" id="check-${t.id}" onclick="toggleTask('${t.id}')"></div>
+            <div class="task-body">
+              <div class="task-name" id="name-${t.id}">${t.name}</div>
+              <div class="task-desc">${t.desc}</div>
+              <div class="task-meta">
+                ${t.who.map(w => `<span class="badge ${whoClass[w]}">${w} — ${whoName[w]}</span>`).join('')}
+                ${t.extra ? '<span class="extra-tag">⭐ Extra</span>' : ''}
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    container.appendChild(el);
+  });
+  updateProgress();
+}
+
+function togglePhase(id) {
+  const tasksEl = document.getElementById('tasks-' + id);
+  const toggleEl = document.getElementById('toggle-' + id);
+  const isOpen = tasksEl.style.display !== 'none';
+  tasksEl.style.display = isOpen ? 'none' : '';
+  toggleEl.classList.toggle('open', !isOpen);
+}
+
+function toggleTask(id) {
+  const check = document.getElementById('check-' + id);
+  const name = document.getElementById('name-' + id);
+  if (done.has(id)) {
+    done.delete(id);
+    check.classList.remove('done');
+    name.classList.remove('done-text');
+  } else {
+    done.add(id);
+    check.classList.add('done');
+    name.classList.add('done-text');
+  }
+  updateProgress();
+}
+
+renderPhases();
+</script>

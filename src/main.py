@@ -293,28 +293,28 @@ def main():
 
     # --- SETUP DE AUDIO (BALATRO) ---
     music_paused = False
-    
+
     # 1. Cargar Música de Fondo
     try:
         music_path = os.path.join(os.path.dirname(__file__), "..", "music", "Balatro OST -  But all tracks play simultaneously.mp3")
         pygame.mixer.music.load(music_path)
         pygame.mixer.music.set_volume(0.2)
-        pygame.mixer.music.play(-1) 
+        pygame.mixer.music.play(-1)
     except Exception as e:
         print(f"Error cargando música: {e}")
 
     try:
         sfx_place_path = os.path.join(os.path.dirname(__file__), "..", "music", "multhit1.ogg")
         sfx_search_path = os.path.join(os.path.dirname(__file__), "..", "music", "multhit2.ogg")
-        
+
         print(f"Buscando sonido de colocar en: {sfx_place_path}")
-        
+
         sfx_place = pygame.mixer.Sound(sfx_place_path)
         sfx_search = pygame.mixer.Sound(sfx_search_path)
         sfx_place.set_volume(0.4)
-        sfx_search.set_volume(0.4) 
+        sfx_search.set_volume(0.4)
         print("✅ ¡Efectos de sonido cargados correctamente!")
-        
+
     except Exception as e:
         print(f"\n🚨 ERROR CARGANDO SFX: {e} 🚨\n")
         sfx_place = DummySound()
@@ -325,7 +325,7 @@ def main():
 
         maze = Maze()
         if choice == "default": maze.load_from_array(DEFAULT_MAZE)
-        elif choice == "random": maze.generate_random(41, 41) 
+        elif choice == "random": maze.generate_random(41, 41)
         elif choice == "upload":
             if file_path.endswith('.txt'): maze.load_from_txt(file_path)
             else: maze.load_from_image(file_path)
@@ -338,7 +338,7 @@ def main():
 
         viz = Visualizer(maze)
         state = "waiting_start"
-        
+
         viz.stats["status"] = "Izq: Inicio | Der: Destino | M: Menú | P: Pausa"
         viz.stats["algo"]   = algo_name
 
@@ -360,7 +360,7 @@ def main():
                         else:
                             pygame.mixer.music.pause()
                             music_paused = True
-                        
+
                     if event.key == pygame.K_r:
                         viz._init_cell_colors()
                         viz.start = None
@@ -381,38 +381,38 @@ def main():
                             viz.reset_search_colors()
                             viz.end = None
                         viz.set_start(pos)
-                        
-                        # ¡REPRODUCIR SONIDO AL PONER EL START!
-                        sfx_place.play() 
-                        
+
+                        sfx_place.play()
+
                         state = "waiting_end"
                         viz.stats["status"] = "Der: Destino | M: Menú | P: Pausa"
 
                     elif event.button == 3 and state == "waiting_end":
                         viz.set_end(pos)
-                        
-                        # ¡REPRODUCIR SONIDO AL PONER EL END!
-                        sfx_place.play() 
-                        
+
+                        sfx_place.play()
+
                         viz.stats["status"] = "Buscando..."
                         viz._draw_frame()
 
-                        # ¡EMPEZAR A LOOPEAR EL SONIDO DE BÚSQUEDA!
-                        sfx_search.play(loops=-1) 
-                        
+                        sfx_search.play(loops=-1)
+
                         result = algo(maze, viz.start, viz.end, callback=viz.callback)
-                        
-                        # ¡DETENER EL SONIDO DE BÚSQUEDA CUANDO TERMINE EL ALGORITMO!
-                        sfx_search.stop() 
+
+                        sfx_search.stop()
+
+                        # ── CAMBIO 2: status más informativo al terminar ──────
+                        algo_tag = "Bidir" if algo_choice == "bidirectional" else "Std"
+                        if result["found"]:
+                            result_status = f"[{algo_tag}] Encontrado ✓ | Izq: nuevo inicio | R: reset"
+                        else:
+                            result_status = f"[{algo_tag}] Sin camino ✗ | R: Reset"
 
                         viz.stats.update({
                             "nodes_explored": result["nodes_explored"],
                             "path_length": len(result["path"]),
                             "time_ms": result["time_ms"],
-                            "status": (
-                                f"[{'Bidir' if algo_choice == 'bidirectional' else 'Std'}] "
-                                + ("Encontrado ✓ | R: Reset | P: Pausa" if result["found"] else "Sin camino ✗ | R: Reset")
-                            ),
+                            "status": result_status,
                         })
                         if result["found"]:
                             viz.mark_path(result["path"])

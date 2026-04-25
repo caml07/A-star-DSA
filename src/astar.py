@@ -20,6 +20,16 @@ import time
 
 
 # ─────────────────────────────────────────
+#  Constantes
+# ─────────────────────────────────────────
+
+# Factor de tie-breaking sutil: cuando dos nodos tienen el mismo f,
+# el algoritmo prefiere el que tiene h más alto (más cerca del destino),
+# evitando explorar nodos "laterales" con el mismo costo.
+_TIEBREAK_EPSILON = 1 + 1e-4
+
+
+# ─────────────────────────────────────────
 #  Heurística
 # ─────────────────────────────────────────
 
@@ -33,13 +43,9 @@ def heuristic(a, b):
     Manhattan cuando no hay paredes. Euclidiana subestima ese costo (da valores
     como 7.07 cuando el mínimo real es 10), lo que hace que A* expanda muchos
     nodos innecesarios y se comporte casi como Dijkstra.
-
-    También aplicamos tie-breaking multiplicando por (1 + ε): cuando dos nodos
-    tienen el mismo f, el algoritmo prefiere el que tiene h más alto (más cerca
-    del destino), evitando explorar nodos "laterales" con el mismo costo.
     """
     manhattan = abs(a[0] - b[0]) + abs(a[1] - b[1])
-    return manhattan * (1 + 1e-4)  # tie-breaking sutil
+    return manhattan * _TIEBREAK_EPSILON
 
 
 # ─────────────────────────────────────────
@@ -241,7 +247,6 @@ def astar_bidirectional(maze, start, end, callback=None):
             break
 
         # ── Expandir el frente con menor f en tope ────────────────────────
-        # (equivalente a alternar pero más inteligente)
         expand_a = top_f_a <= top_f_b
 
         if expand_a:
@@ -263,7 +268,6 @@ def astar_bidirectional(maze, start, end, callback=None):
                     set(closed_b),
                 )
 
-            # ¿Este nodo ya fue procesado por el frente B?
             if cur.pos in closed_b:
                 cost = closed_a[cur.pos].g + closed_b[cur.pos].g
                 if cost < best_cost:
@@ -318,7 +322,6 @@ def astar_bidirectional(maze, start, end, callback=None):
     elapsed = (time.perf_counter() - t_start) * 1000
 
     if meeting_pos is not None:
-        # Reconstruir ambas mitades desde el punto de encuentro
         path_a = _reconstruct_path_from_node(closed_a[meeting_pos])  # start → meeting
         path_b = _reconstruct_path_from_node(closed_b[meeting_pos])  # end   → meeting
 

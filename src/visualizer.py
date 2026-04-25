@@ -347,9 +347,9 @@ class Visualizer:
             self.screen.blit(surf, (px + 14, status_y))
             status_y += 16
 
-        # Hint teclas
+        # ── CAMBIO 1: Hint de teclas completo ─────────────────────────────
         hint_y = self.win_h - 20
-        hint = self._font_mono_sm.render("R reiniciar  ·  ESC salir", True, COLORS["border"])
+        hint = self._font_mono_sm.render("R reset · M menú · P pausa · ESC salir", True, COLORS["border"])
         self.screen.blit(hint, (px + pw // 2 - hint.get_width() // 2, hint_y))
 
     # ── Conversión pixel → celda ──────────────────────────────────────────────
