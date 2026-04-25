@@ -84,14 +84,15 @@ Píxeles oscuros → pared. Píxeles claros → celda libre.
 
 ```
 A-star-DSA/
+├── docs/                 # Documentación del proyecto
+│   ├── Roadmap.md        # Roadmap y diagramas
+│   ├── astar_roadmap.html
+│   └── b0378e6504fbf3787a0e9053acbb042b.jpg
 ├── src/
 │   ├── astar.py         # A* estándar + bidireccional (Eduardo)
 │   ├── maze.py          # Clase Maze, loaders (Steven)
 │   ├── visualizer.py    # Render con Pygame (Luis)
 │   └── main.py          # Entry point y menús (Eduardo)
-├── data/
-│   ├── default_maze.txt # Maze de ejemplo 10×10
-│   └── mymaze.txt       # Maze alternativo
 ├── tests/
 │   ├── test_astar.py    # Unit tests del algoritmo (Steven)
 │   └── test_maze.py     # Tests de Maze (Steven)
